@@ -1,0 +1,3542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Estado Proyectos Clientes — URA Industries</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&family=Barlow+Semi+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #0C0C0C;
+  --surf:   #141414;
+  --card:   #1A1A1A;
+  --elev:   #222222;
+  --brd:    #282828;
+  --brdl:   #333333;
+  --t1:     #F0EDE8;   /* primary text   */
+  --t2:     #B8B4AE;   /* secondary text  — raised from #9A9690 */
+  --t3:     #7A7773;   /* muted text      — raised from #5A5754 */
+  --t4:     #5A5754;   /* very muted      */
+  --red:    #D93025;
+  --red-d:  rgba(217,48,37,0.10);
+  --red-b:  rgba(217,48,37,0.28);
+  --sage:   #7A9478;
+  --sage-d: rgba(122,148,120,0.12);
+  --sage-b: rgba(122,148,120,0.4);
+  --amb:    #C98A2E;
+  --amb-d:  rgba(201,138,46,0.12);
+  --blue:   #4A7FA8;
+  --blue-d: rgba(74,127,168,0.12);
+  --w:      #FFFFFF;
+  --fd: 'Barlow Condensed', sans-serif;
+  --fb: 'Barlow', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-weight:300;font-size:13px;line-height:1.65;-webkit-font-smoothing:antialiased;}
+
+/* ─── HEADER ─── */
+.hdr{background:var(--surf);border-bottom:1px solid var(--brd);padding:38px 56px 34px;position:relative;overflow:hidden;}
+.hdr::after{content:'✳';position:absolute;right:56px;top:50%;transform:translateY(-50%);font-size:180px;color:var(--red);opacity:0.04;line-height:1;}
+.brow{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.bdot{width:13px;height:13px;background:var(--t1);border-radius:50%;}
+.bname{font-family:var(--fd);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;}
+.bname span{color:var(--t4);font-weight:400;}
+.rtitle{font-family:var(--fd);font-size:34px;font-weight:700;letter-spacing:-.01em;line-height:1.1;text-transform:uppercase;color:var(--w);margin-bottom:9px;}
+.rmeta{font-size:12px;color:var(--t3);letter-spacing:.03em;}
+.rmeta strong{color:var(--t2);font-weight:500;}
+
+/* ─── SELECTOR BAR ─── */
+.sel-bar{background:var(--surf);border-bottom:1px solid var(--brd);padding:18px 56px;display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:100;}
+.sel-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--t4);white-space:nowrap;font-weight:600;}
+.pills{display:flex;flex-wrap:wrap;gap:5px;}
+.pill{padding:5px 13px;font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--card);border:1px solid var(--brdl);color:var(--t3);cursor:pointer;transition:all .14s;white-space:nowrap;}
+.pill:hover{border-color:var(--t2);color:var(--t1);}
+.pill.active{background:var(--t1);color:var(--bg);border-color:var(--t1);}
+.pill.alert-pill{border-color:var(--red-b);}
+.pill.alert-pill.active{background:var(--red);border-color:var(--red);color:#fff;}
+.pill.all{border-style:dashed;}
+
+/* ─── LAYOUT ─── */
+.wrap{max-width:1340px;margin:0 auto;padding:0 56px;}
+.sec{padding:44px 0 0;}
+.sec:last-child{padding-bottom:80px;}
+.shd{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:12px;border-bottom:1px solid var(--brd);}
+.sn{font-family:var(--fd);font-size:10px;letter-spacing:.14em;color:var(--red);font-weight:600;text-transform:uppercase;}
+.st{font-family:var(--fd);font-size:19px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--w);}
+
+/* ─── KPI 3-GRID ─── */
+.kpi3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--brd);border:1px solid var(--brd);margin-bottom:28px;}
+.kpi{background:var(--card);padding:22px 20px;}
+.kl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--t2);margin-bottom:7px;}
+.kv{font-family:var(--fd);font-size:42px;font-weight:700;line-height:1;color:var(--w);}
+.kv.red{color:var(--red);}
+.kv.sage{color:var(--sage);}
+.ks{font-size:11px;color:var(--t2);margin-top:4px;}
+
+/* ─── CHART ROWS ─── */
+.charts2{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--brd);border:1px solid var(--brd);margin-bottom:28px;}
+.cbox{background:var(--card);padding:22px 24px;}
+.ctitle{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--t4);font-weight:600;margin-bottom:14px;}
+.ccanvas{position:relative;height:200px;}
+
+/* ─── TEAM CHART (single wide) ─── */
+.chart1{border:1px solid var(--brd);background:var(--card);padding:22px 24px;margin-bottom:28px;}
+.ccanvas-wide{position:relative;height:130px;}
+
+/* ─── LAB/DEV FILTER ─── */
+.stage-filter{display:flex;gap:6px;margin-bottom:28px;align-items:center;}
+.sf-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--t4);font-weight:600;margin-right:4px;}
+.sf-btn{padding:6px 16px;font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--brdl);background:var(--card);color:var(--t3);cursor:pointer;transition:all .14s;}
+.sf-btn:hover{color:var(--t1);border-color:var(--t2);}
+.sf-btn.active-lab{background:var(--amb-d);border-color:var(--amb);color:var(--amb);}
+.sf-btn.active-dev{background:var(--blue-d);border-color:var(--blue);color:var(--blue);}
+.sf-btn.active-all{background:var(--elev);border-color:var(--brdl);color:var(--t1);}
+
+/* ─── STAGE BLOCKS ─── */
+.stage-block{margin-bottom:24px;}
+.stage-lbl{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.spill{font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:3px 11px;border:1px solid;}
+.spill.lab{color:var(--amb);border-color:var(--amb);background:var(--amb-d);}
+.spill.dev{color:var(--blue);border-color:var(--blue);background:var(--blue-d);}
+.scnt{font-size:11px;color:var(--t4);}
+
+/* ─── PROJECT BLOCKS ─── */
+.pb{border:1px solid var(--brd);margin-bottom:7px;}
+.pb.pr{border-color:var(--red-b);}
+.ph{display:flex;align-items:center;gap:11px;padding:11px 17px;background:var(--card);border-bottom:1px solid var(--brd);cursor:pointer;user-select:none;}
+.pb.pr .ph{background:rgba(217,48,37,.05);}
+.pn{font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--w);}
+.pc{font-size:11px;color:var(--t4);}
+.pbdg{margin-left:auto;display:flex;gap:5px;align-items:center;}
+.bdg{font-size:10px;letter-spacing:.07em;padding:2px 8px;border:1px solid;}
+.bdg.ok{color:var(--sage);border-color:var(--sage);background:var(--sage-d);}
+.bdg.al{color:var(--red);border-color:var(--red-b);background:var(--red-d);}
+.bdg.n{color:var(--t4);border-color:var(--brdl);}
+.ptog{font-size:10px;color:var(--t4);transition:transform .18s;margin-left:6px;}
+.ptog.open{transform:rotate(90deg);}
+.pbody{display:none;}
+.pbody.open{display:block;}
+
+/* ─── PROJECT CHARTS ─── */
+.pcharts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--brd);border-bottom:1px solid var(--brd);}
+.pcb{background:var(--elev);padding:16px 18px;}
+.pct{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);font-weight:600;margin-bottom:10px;}
+.pccanvas{position:relative;height:110px;}
+
+/* ─── ITEMS TABLE ─── */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{padding:9px 13px;text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);font-weight:600;background:var(--elev);border-bottom:1px solid var(--brd);white-space:nowrap;}
+.tbl td{padding:8px 13px;color:var(--t2);border-bottom:1px solid var(--brd);vertical-align:top;font-size:12px;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr.rr{background:rgba(217,48,37,.04);}
+.tbl tr.rr td:first-child{border-left:2px solid var(--red);}
+.idc{font-family:var(--fd);font-size:13px;font-weight:700;color:var(--w)!important;white-space:nowrap;}
+.ptag{display:inline-block;padding:2px 7px;background:var(--elev);border:1px solid var(--brdl);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--t1);white-space:nowrap;}
+.ptag.sage{background:var(--sage-d);border-color:var(--sage-b);color:var(--sage);}
+.ptag.red{background:var(--red-d);border-color:var(--red-b);color:var(--red);}
+.restr-cell{color:var(--red)!important;font-weight:500;font-size:11.5px;}
+.obs-cell{color:var(--t3)!important;font-style:italic;font-size:11.5px;line-height:1.4;}
+.ttag{display:inline-block;padding:2px 7px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;border:1px solid;white-space:nowrap;}
+.tDes{color:var(--blue);border-color:var(--blue);background:var(--blue-d);}
+.tDis{color:var(--sage);border-color:var(--sage);background:var(--sage-d);}
+.tOpe{color:var(--amb);border-color:var(--amb);background:var(--amb-d);}
+.tPla{color:var(--t3);border-color:var(--brdl);background:var(--elev);}
+.tOD{color:var(--amb);border-color:var(--amb);background:var(--amb-d);}
+.ok{color:var(--sage);font-weight:600;font-size:11px;}
+.no{color:var(--t4);font-size:11px;}
+
+/* ─── SECTION TYPE HEADER ROW ─── */
+.type-hdr-row td{background:var(--card)!important;border-left:none!important;border-bottom:1px solid var(--brdl)!important;padding:6px 13px!important;}
+.type-hdr-lbl{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red);}
+.type-hdr-cnt{font-size:11px;color:var(--t4);margin-left:8px;}
+
+/* ─── TABLE WRAPPER ─── */
+.tw{border:1px solid var(--brd);overflow-x:auto;}
+
+/* ─── ANNOTATION BOX ─── */
+.annot{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--sage-d);border:1px solid var(--sage-b);margin-bottom:14px;font-size:12px;color:var(--sage);}
+.annot strong{font-weight:600;}
+
+/* ─── PROCESS DIST TABLE ─── */
+.pdtbl{width:100%;border-collapse:collapse;}
+.pdtbl th{padding:9px 13px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);font-weight:600;text-align:left;background:var(--card);border-bottom:1px solid var(--brd);}
+.pdtbl td{padding:9px 13px;color:var(--t2);border-bottom:1px solid var(--brd);font-size:12px;}
+.bignum{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--w);}
+.bignum.r{color:var(--red);}
+.bignum.s{color:var(--sage);}
+.bbar{height:3px;background:var(--brdl);width:90px;margin-top:4px;}
+.bfill{height:3px;background:var(--sage);}
+.bfill.al{background:var(--red);}
+
+/* ─── FOOTER ─── */
+.ftr{border-top:1px solid var(--brd);padding:20px 56px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--t4);}
+.fbn{font-family:var(--fd);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t2);}
+
+.empty{padding:32px;text-align:center;color:var(--t4);font-size:13px;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="brow"><div class="bdot"></div><div class="bname">URA <span>Industries</span></div></div>
+  <div class="rtitle">Informe de Estado<br>Proyectos Clientes</div>
+  <div class="rmeta">Dirigido a: <strong>Equipo Comercial</strong> &nbsp;·&nbsp; Generado: <strong>16 de abril de 2026</strong> &nbsp;·&nbsp; Fuente: Cronograma Detallado</div>
+</div>
+
+<!-- CLIENT SELECTOR -->
+<div class="sel-bar">
+  <div class="sel-label">Cliente</div>
+  <div class="pills" id="pills"></div>
+</div>
+
+<div class="wrap" id="wrap">
+
+  <!-- ══ GLOBAL SECTION ══ -->
+  <div id="gSec" class="sec">
+    <div class="shd"><span class="sn">Resumen</span><span class="st">Estado General del Pipeline</span></div>
+    <div class="kpi3" id="gKpis"></div>
+    <div class="charts2" id="gCharts"></div>
+    <div class="shd" style="margin-top:36px;"><span class="sn">⚠ Urgente</span><span class="st">Ítems con Restricción</span></div>
+    <div class="tw"><table class="tbl" id="gRestrTable"><thead><tr>
+      <th>Item Matt</th><th>Item Ura</th><th>Equipo</th><th>Cliente</th><th>Proyecto</th>
+      <th>Combo</th><th>Proceso</th><th>Restricción</th><th>OC</th>
+    </tr></thead><tbody id="gRestrBody"></tbody></table></div>
+    <div class="shd" style="margin-top:36px;"><span class="sn">05</span><span class="st">Distribución por Proceso</span></div>
+    <div class="tw"><table class="pdtbl"><thead><tr><th>Proceso</th><th>Total</th><th>Bloqueados</th><th>Libres</th><th>% Bloqueado</th></tr></thead><tbody id="gProcBody"></tbody></table></div>
+  </div>
+
+  <!-- ══ CLIENT SECTION ══ -->
+  <div id="cSec" class="sec" style="display:none;">
+    <div class="shd"><span class="sn">Cliente</span><span class="st" id="cTitle">—</span></div>
+    <div class="kpi3" id="cKpis"></div>
+
+    <!-- Team chart -->
+    <div class="chart1">
+      <div class="ctitle">Distribución de ítems por equipo responsable</div>
+      <div class="ccanvas-wide"><canvas id="cTeamChart"></canvas></div>
+    </div>
+
+    <!-- Lab/Dev filter -->
+    <div class="stage-filter">
+      <span class="sf-label">Ver proyectos:</span>
+      <button class="sf-btn active-all" id="sfAll"  onclick="setStageFilter('ALL')">Todos</button>
+      <button class="sf-btn" id="sfLab"  onclick="setStageFilter('LAB')">🔬 Laboratorio</button>
+      <button class="sf-btn" id="sfDev"  onclick="setStageFilter('DEV')">⚙ Desarrollo</button>
+    </div>
+
+    <!-- Process charts (filtered by stage) -->
+    <div class="charts2" id="cCharts"></div>
+
+    <!-- Restriction table (filtered by stage) -->
+    <div class="shd"><span class="sn">⚠ Restricciones</span><span class="st" id="cRestrTitle">Ítems con Restricción</span></div>
+    <div class="tw"><table class="tbl" id="cRestrTable"><thead><tr>
+      <th>Item Matt</th><th>Item Ura</th><th>Equipo</th><th>Proyecto</th>
+      <th>Combo</th><th>Proceso</th><th>Restricción</th><th>Observación</th><th>OC</th>
+    </tr></thead><tbody id="cRestrBody"></tbody></table></div>
+
+    <!-- Projects -->
+    <div class="shd" style="margin-top:36px;"><span class="sn">Proyectos</span><span class="st">Vista por Proyecto</span></div>
+    <div id="cLabBlock" class="stage-block">
+      <div class="stage-lbl"><span class="spill lab">Laboratorio</span><span class="scnt" id="cLabCnt"></span></div>
+      <div id="cLabProj"></div>
+    </div>
+    <div id="cDevBlock" class="stage-block">
+      <div class="stage-lbl"><span class="spill dev">Desarrollo / Producción</span><span class="scnt" id="cDevCnt"></span></div>
+      <div id="cDevProj"></div>
+    </div>
+
+    <!-- Non-blocked process chart -->
+    <div class="shd" style="margin-top:36px;"><span class="sn">Flujo libre</span><span class="st">Proceso — Ítems sin Restricción</span></div>
+    <div class="annot">
+      <span>📋</span>
+      <span><strong>Esta gráfica incluye únicamente los ítems sin restricción activa.</strong> Los ítems bloqueados están excluidos de esta distribución.</span>
+    </div>
+    <div class="charts2" id="cFreeCharts"></div>
+  </div>
+
+</div>
+
+<div class="ftr">
+  <div><div class="fbn">○ URA Industries®</div><div style="margin-top:2px;">Ropa de alta calidad hecha en condiciones justas · www.uraindustries.com</div></div>
+  <div style="text-align:right;">Equipo de Operaciones · Uso interno · Abr 2026</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  DATA (injected)
+// ══════════════════════════════════════════
+const DATA = {
+  "ARMATURA": {
+    "name": "ARMATURA",
+    "total": 5,
+    "with_restriction": 0,
+    "without_restriction": 5,
+    "projects": {
+      "ESSENTIAL": {
+        "name": "ESSENTIAL",
+        "total": 1,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "—",
+            "item_ura": "4097",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "HALFZIP PREMIUM COMFY",
+            "proceso": "Abast. Desarrollo",
+            "oc": "OK",
+            "observacion": "Solo strike off y pasa a producción, necesitan la producción para el 21 de julio",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "ARMATURA",
+            "proyecto": "ESSENTIAL"
+          }
+        ]
+      },
+      "HALFZIP": {
+        "name": "HALFZIP",
+        "total": 3,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "96433",
+            "item_ura": "253",
+            "equipo": "Operaciones",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "ARMATURA",
+            "proyecto": "HALFZIP"
+          },
+          {
+            "item_matt": "96672",
+            "item_ura": "254",
+            "equipo": "Operaciones",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0626",
+            "cliente": "ARMATURA",
+            "proyecto": "HALFZIP"
+          },
+          {
+            "item_matt": "96673",
+            "item_ura": "255",
+            "equipo": "Operaciones",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0626",
+            "cliente": "ARMATURA",
+            "proyecto": "HALFZIP"
+          }
+        ]
+      },
+      "[SIN PROYECTO]": {
+        "name": "[SIN PROYECTO]",
+        "total": 1,
+        "restricted": 0,
+        "stage": "LAB",
+        "items": [
+          {
+            "item_matt": "96006",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "PIERO",
+            "proceso": "Proto Lab",
+            "oc": "—",
+            "observacion": "Se esta repitiendo por talla",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0626",
+            "cliente": "ARMATURA",
+            "proyecto": "[SIN PROYECTO]"
+          }
+        ]
+      }
+    }
+  },
+  "ARTURO CALLE": {
+    "name": "ARTURO CALLE",
+    "total": 24,
+    "with_restriction": 24,
+    "without_restriction": 0,
+    "projects": {
+      "HERITAGE IN MOTION": {
+        "name": "HERITAGE IN MOTION",
+        "total": 24,
+        "restricted": 24,
+        "stage": "LAB",
+        "items": [
+          {
+            "item_matt": "97029",
+            "item_ura": "4062",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "SPRINGS",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97030",
+            "item_ura": "4063",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "COASTAL REGATTA",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97031",
+            "item_ura": "4064",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "HILTON HEAD",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97032",
+            "item_ura": "4065",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "COURTSIDE HERITAGE",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97033",
+            "item_ura": "4066",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "BLACK NINE",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97034",
+            "item_ura": "4067",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "TEXTURIZADA",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97035",
+            "item_ura": "4068",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "LAVANDERIA",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97036",
+            "item_ura": "4069",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "CUELLO HENLEY",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97037",
+            "item_ura": "4070",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "HILTON HEAD",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97038",
+            "item_ura": "4071",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "TEXTURIZADA RANGLAN",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97039",
+            "item_ura": "4072",
+            "equipo": "Diseño",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "MEMBERS ONLY",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97040",
+            "item_ura": "4073",
+            "equipo": "Diseño",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "HILTON HEARD",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97041",
+            "item_ura": "4074",
+            "equipo": "Diseño",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "HILTON HEARD",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97042",
+            "item_ura": "4075",
+            "equipo": "Diseño",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "CREWNECK BLACK NINE",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97043",
+            "item_ura": "4076",
+            "equipo": "Diseño",
+            "categoria": "POLO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "PRUVATE COURTS",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97044",
+            "item_ura": "4077",
+            "equipo": "Diseño",
+            "categoria": "CHAQUETA",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "HERITAGE IN MOTION",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97045",
+            "item_ura": "4078",
+            "equipo": "Diseño",
+            "categoria": "PANTALÓN",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "—",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97046",
+            "item_ura": "4079",
+            "equipo": "Diseño",
+            "categoria": "PANTALÓN",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "—",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97047",
+            "item_ura": "4080",
+            "equipo": "Diseño",
+            "categoria": "PANTALÓN",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "—",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97048",
+            "item_ura": "4081",
+            "equipo": "Diseño",
+            "categoria": "PANTALÓN",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "CHINO",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97049",
+            "item_ura": "4082",
+            "equipo": "Diseño",
+            "categoria": "JEAN",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "STRAIGHT",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97050",
+            "item_ura": "4083",
+            "equipo": "Diseño",
+            "categoria": "JEAN",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "STRAIGHT",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97051",
+            "item_ura": "4084",
+            "equipo": "Diseño",
+            "categoria": "JEAN",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "STRAIGHT",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          },
+          {
+            "item_matt": "97160",
+            "item_ura": "4085",
+            "equipo": "Diseño",
+            "categoria": "POLO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Aprobación Fit & Strike",
+            "oc": "—",
+            "observacion": "Pendiente revisar fecha de abastecimeinto para dar fecha de strike off y fit",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "ARTURO CALLE",
+            "proyecto": "HERITAGE IN MOTION"
+          }
+        ]
+      }
+    }
+  },
+  "CLEMONT": {
+    "name": "CLEMONT",
+    "total": 42,
+    "with_restriction": 13,
+    "without_restriction": 29,
+    "projects": {
+      "ABISSALE": {
+        "name": "ABISSALE",
+        "total": 1,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "93737",
+            "item_ura": "207",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "ABISSALE",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "ABISSALE"
+          }
+        ]
+      },
+      "ADERIRE": {
+        "name": "ADERIRE",
+        "total": 3,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "93633",
+            "item_ura": "211",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "ADERIRE",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "ADERIRE"
+          },
+          {
+            "item_matt": "93634",
+            "item_ura": "210",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "ADERIRE",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "ADERIRE"
+          },
+          {
+            "item_matt": "93635",
+            "item_ura": "209",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "ADERIRE",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "ADERIRE"
+          }
+        ]
+      },
+      "APOSTOLO": {
+        "name": "APOSTOLO",
+        "total": 2,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "94501",
+            "item_ura": "213",
+            "equipo": "Desarrollo",
+            "categoria": "CHAQUETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "APOSTOLO",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "APOSTOLO"
+          },
+          {
+            "item_matt": "94509",
+            "item_ura": "212",
+            "equipo": "Desarrollo",
+            "categoria": "CHAQUETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "APOSTOLO",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "APOSTOLO"
+          }
+        ]
+      },
+      "BAGLIORI": {
+        "name": "BAGLIORI",
+        "total": 2,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "94503",
+            "item_ura": "215",
+            "equipo": "Desarrollo",
+            "categoria": "JOGGER",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "BAGLIORI",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "BAGLIORI"
+          },
+          {
+            "item_matt": "94510",
+            "item_ura": "214",
+            "equipo": "Desarrollo",
+            "categoria": "JOGGER",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "BAGLIORI",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "BAGLIORI"
+          }
+        ]
+      },
+      "CHERUBINO": {
+        "name": "CHERUBINO",
+        "total": 3,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "94525",
+            "item_ura": "217",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "CHERUBINO",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "CHERUBINO"
+          },
+          {
+            "item_matt": "94526",
+            "item_ura": "216",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "CHERUBINO",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "CHERUBINO"
+          },
+          {
+            "item_matt": "94527",
+            "item_ura": "218",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "CHERUBINO",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "CHERUBINO"
+          }
+        ]
+      },
+      "LA VIA DE LA ILUMINACIÓN": {
+        "name": "LA VIA DE LA ILUMINACIÓN",
+        "total": 13,
+        "restricted": 9,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "95559",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "SHORTS",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "PENOMBRA",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Aprobado y pendiente OC",
+            "restriccion": "Pendiente OC",
+            "restriction_type": "Pendiente OC",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95560",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "MUJER",
+            "tejido": "PUNTO PESADO",
+            "combo": "OBBEDIENZA",
+            "proceso": "Fit Sample",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "Q4-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95561",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "MUJER",
+            "tejido": "PUNTO PESADO",
+            "combo": "OBBEDIENZA",
+            "proceso": "Fit Sample",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "Q4-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95562",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "SHORTS",
+            "genero": "MUJER",
+            "tejido": "PUNTO PESADO",
+            "combo": "FRAGORE",
+            "proceso": "Fit Sample",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "Q4-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95563",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "SHORTS",
+            "genero": "MUJER",
+            "tejido": "PUNTO PESADO",
+            "combo": "FRAGORE",
+            "proceso": "Fit Sample",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "Q4-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95564",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "JOGGER",
+            "genero": "MUJER",
+            "tejido": "PUNTO PESADO",
+            "combo": "CALATA",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Aprobado y pendiente OC",
+            "restriccion": "Pendiente OC",
+            "restriction_type": "Pendiente OC",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95565",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "JOGGER",
+            "genero": "MUJER",
+            "tejido": "PUNTO PESADO",
+            "combo": "CALATA",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Aprobado y pendiente OC",
+            "restriccion": "Pendiente OC",
+            "restriction_type": "Pendiente OC",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95566",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "MUJER",
+            "tejido": "PUNTO PESADO",
+            "combo": "TRAPASSO",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Pendiente aprobación",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95567",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "MUJER",
+            "tejido": "PUNTO PESADO",
+            "combo": "TRAPASSO",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Pendiente aprobación",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95583",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "SOMMO",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Pendiente aprobación",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95584",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "SOMMO",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Pendiente aprobación",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95585",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "JOGGER",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "FULGENTE",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Pendiente aprobación",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          },
+          {
+            "item_matt": "95586",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "JOGGER",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "FULGENTE",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Pendiente aprobación",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA ILUMINACIÓN"
+          }
+        ]
+      },
+      "LA VIA DE LA LUZ": {
+        "name": "LA VIA DE LA LUZ",
+        "total": 2,
+        "restricted": 2,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "95484",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "ECCELLENZA",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "—",
+            "observacion": "Se rechazo la mv",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA LUZ"
+          },
+          {
+            "item_matt": "95486",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "ECCELLENZA",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "—",
+            "observacion": "Se rechazo la mv",
+            "restriccion": "Pendiente abastecimiento desarrollo",
+            "restriction_type": "Pendiente abastecimiento desarrollo",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q3-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DE LA LUZ"
+          }
+        ]
+      },
+      "LA VIA DEL FUEGO": {
+        "name": "LA VIA DEL FUEGO",
+        "total": 6,
+        "restricted": 2,
+        "stage": "LAB",
+        "items": [
+          {
+            "item_matt": "96607",
+            "item_ura": "3662",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "RUBEDO",
+            "proceso": "Strike Off",
+            "oc": "—",
+            "observacion": "Cliente hizo cambios",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "Q4-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DEL FUEGO"
+          },
+          {
+            "item_matt": "96608",
+            "item_ura": "3663",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "VEGGENTE",
+            "proceso": "Strike Off",
+            "oc": "—",
+            "observacion": "Cliente hizo cambios",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "Q4-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DEL FUEGO"
+          },
+          {
+            "item_matt": "96645",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "POLO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "INTENZIONE",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Frenado por ficha del cliente",
+            "restriccion": "Pendiente cambios de ficha cliente",
+            "restriction_type": "Pendiente cambios de ficha cliente",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q4-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DEL FUEGO"
+          },
+          {
+            "item_matt": "96646",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "POLO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "INTENZIONE",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Frenado por ficha del cliente",
+            "restriccion": "Pendiente cambios de ficha cliente",
+            "restriction_type": "Pendiente cambios de ficha cliente",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "Q4-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DEL FUEGO"
+          },
+          {
+            "item_matt": "96647",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "RUBEDO",
+            "proceso": "Strike Off",
+            "oc": "—",
+            "observacion": "Cliente hizo cambios",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "Q4-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DEL FUEGO"
+          },
+          {
+            "item_matt": "96648",
+            "item_ura": "—",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "VEGGENTE",
+            "proceso": "Strike Off",
+            "oc": "—",
+            "observacion": "Cliente hizo cambios",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "Q4-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LA VIA DEL FUEGO"
+          }
+        ]
+      },
+      "LUSINGA": {
+        "name": "LUSINGA",
+        "total": 3,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "94671",
+            "item_ura": "224",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "LUSINGA",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LUSINGA"
+          },
+          {
+            "item_matt": "94672",
+            "item_ura": "223",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "LUSINGA",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LUSINGA"
+          },
+          {
+            "item_matt": "94673",
+            "item_ura": "222",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "LUSINGA",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "LUSINGA"
+          }
+        ]
+      },
+      "PIOMBO": {
+        "name": "PIOMBO",
+        "total": 2,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "94499",
+            "item_ura": "229",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "MUJER",
+            "tejido": "PUNTO PESADO",
+            "combo": "PIOMBO",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "PIOMBO"
+          },
+          {
+            "item_matt": "94506",
+            "item_ura": "228",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "MUJER",
+            "tejido": "PUNTO PESADO",
+            "combo": "PIOMBO",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "PIOMBO"
+          }
+        ]
+      },
+      "SANTITA": {
+        "name": "SANTITA",
+        "total": 1,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "93647",
+            "item_ura": "231",
+            "equipo": "Desarrollo",
+            "categoria": "SHORTS",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "SANTITA",
+            "proceso": "Liberación a Corte",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "SANTITA"
+          }
+        ]
+      },
+      "SERAFINA": {
+        "name": "SERAFINA",
+        "total": 3,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "94528",
+            "item_ura": "235",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "SERAFINA",
+            "proceso": "Sin definir",
+            "oc": "OK",
+            "observacion": "Estamos esperando a cortar cherubino  y ver si queda tela/ pendiente fecha entre pt",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "SERAFINA"
+          },
+          {
+            "item_matt": "94529",
+            "item_ura": "234",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "SERAFINA",
+            "proceso": "Sin definir",
+            "oc": "OK",
+            "observacion": "Estamos esperando a cortar cherubino  y ver si queda tela/ pendiente fecha entre pt",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "SERAFINA"
+          },
+          {
+            "item_matt": "94530",
+            "item_ura": "236",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "SERAFINA",
+            "proceso": "Sin definir",
+            "oc": "OK",
+            "observacion": "Estamos esperando a cortar cherubino  y ver si queda tela/ pendiente fecha entre pt",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "SERAFINA"
+          }
+        ]
+      },
+      "SUSSURRO": {
+        "name": "SUSSURRO",
+        "total": 1,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "94511",
+            "item_ura": "237",
+            "equipo": "Operaciones",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "SUSSURRO",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "CLEMONT",
+            "proyecto": "SUSSURRO"
+          }
+        ]
+      }
+    }
+  },
+  "COURT": {
+    "name": "COURT",
+    "total": 1,
+    "with_restriction": 1,
+    "without_restriction": 0,
+    "projects": {
+      "[SIN PROYECTO]": {
+        "name": "[SIN PROYECTO]",
+        "total": 1,
+        "restricted": 1,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "96609",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "TOP",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "FLORECER",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Esperando aprobación proto",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "DEV",
+            "coleccion": "0826",
+            "cliente": "COURT",
+            "proyecto": "[SIN PROYECTO]"
+          }
+        ]
+      }
+    }
+  },
+  "MARIO HERNANDEZ": {
+    "name": "MARIO HERNANDEZ",
+    "total": 14,
+    "with_restriction": 0,
+    "without_restriction": 14,
+    "projects": {
+      "SS26": {
+        "name": "SS26",
+        "total": 14,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "96492",
+            "item_ura": "2397",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "MARIPOSAS SOBRIO",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96493",
+            "item_ura": "2398",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "MARIPOSAS SOBRIO",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96494",
+            "item_ura": "2399",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "MARIPOSAS ILUS",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96495",
+            "item_ura": "2400",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "MARIPOSAS ILUS",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96496",
+            "item_ura": "2401",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "MARIPOSA ARTESANO",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96497",
+            "item_ura": "2402",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "MARIPOSA ARTESANO",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96485",
+            "item_ura": "2390",
+            "equipo": "Operaciones/Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96486",
+            "item_ura": "2391",
+            "equipo": "Operaciones/Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96487",
+            "item_ura": "2392",
+            "equipo": "Operaciones/Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96488",
+            "item_ura": "2393",
+            "equipo": "Operaciones/Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96489",
+            "item_ura": "2394",
+            "equipo": "Operaciones/Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "UNICORNIO",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96490",
+            "item_ura": "2395",
+            "equipo": "Operaciones/Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "PALENQUE",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96491",
+            "item_ura": "2396",
+            "equipo": "Operaciones/Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "PALENQUE",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96502",
+            "item_ura": "2403",
+            "equipo": "Operaciones/Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "UNICORNIO",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "1026",
+            "cliente": "MARIO HERNANDEZ",
+            "proyecto": "SS26"
+          }
+        ]
+      }
+    }
+  },
+  "MONOIC": {
+    "name": "MONOIC",
+    "total": 24,
+    "with_restriction": 1,
+    "without_restriction": 23,
+    "projects": {
+      "FC": {
+        "name": "FC",
+        "total": 10,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "—",
+            "item_ura": "2408",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "SHIELD",
+            "proceso": "Abast. Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "MONOIC",
+            "proyecto": "FC"
+          },
+          {
+            "item_matt": "—",
+            "item_ura": "2409",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "SHIELD",
+            "proceso": "Abast. Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "MONOIC",
+            "proyecto": "FC"
+          },
+          {
+            "item_matt": "—",
+            "item_ura": "2410",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "LEAGUE",
+            "proceso": "Abast. Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "MONOIC",
+            "proyecto": "FC"
+          },
+          {
+            "item_matt": "—",
+            "item_ura": "2411",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "DREAMERS CLUB",
+            "proceso": "Abast. Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "MONOIC",
+            "proyecto": "FC"
+          },
+          {
+            "item_matt": "—",
+            "item_ura": "2412",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "96",
+            "proceso": "Abast. Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "MONOIC",
+            "proyecto": "FC"
+          },
+          {
+            "item_matt": "—",
+            "item_ura": "2413",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "96",
+            "proceso": "Abast. Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "MONOIC",
+            "proyecto": "FC"
+          },
+          {
+            "item_matt": "—",
+            "item_ura": "2414",
+            "equipo": "Desarrollo",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "NINETYSIX",
+            "proceso": "Abast. Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "MONOIC",
+            "proyecto": "FC"
+          },
+          {
+            "item_matt": "—",
+            "item_ura": "2415",
+            "equipo": "Desarrollo",
+            "categoria": "HOODIE",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "MONOIC FC",
+            "proceso": "Abast. Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "MONOIC",
+            "proyecto": "FC"
+          },
+          {
+            "item_matt": "—",
+            "item_ura": "2416",
+            "equipo": "Desarrollo",
+            "categoria": "JOGGER",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "SHIELD",
+            "proceso": "Abast. Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "MONOIC",
+            "proyecto": "FC"
+          },
+          {
+            "item_matt": "—",
+            "item_ura": "2417",
+            "equipo": "Desarrollo",
+            "categoria": "SHORT",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "SHIELD SHORT",
+            "proceso": "Abast. Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "MONOIC",
+            "proyecto": "FC"
+          }
+        ]
+      },
+      "LABORATORIO": {
+        "name": "LABORATORIO",
+        "total": 1,
+        "restricted": 1,
+        "stage": "LAB",
+        "items": [
+          {
+            "item_matt": "96503",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Esperando aprobación de lab",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0726",
+            "cliente": "MONOIC",
+            "proyecto": "LABORATORIO"
+          }
+        ]
+      },
+      "SS26": {
+        "name": "SS26",
+        "total": 13,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "96374",
+            "item_ura": "2378",
+            "equipo": "Desarrollo",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "Revisarlas con Ricky",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96377",
+            "item_ura": "2381",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96378",
+            "item_ura": "2382",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96380",
+            "item_ura": "2384",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96381",
+            "item_ura": "2385",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96382",
+            "item_ura": "2386",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96383",
+            "item_ura": "2387",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96384",
+            "item_ura": "2388",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96385",
+            "item_ura": "2389",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96375",
+            "item_ura": "2379",
+            "equipo": "Operaciones",
+            "categoria": "JOGGER",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "Revisarlas con Ricky",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96376",
+            "item_ura": "2380",
+            "equipo": "Operaciones",
+            "categoria": "JOGGER",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "Revisarlas con Ricky",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96379",
+            "item_ura": "2383",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "Revisarlas con Ricky",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          },
+          {
+            "item_matt": "96372",
+            "item_ura": "2377",
+            "equipo": "Operaciones",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "—",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "Revisarlas con Ricky",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0526",
+            "cliente": "MONOIC",
+            "proyecto": "SS26"
+          }
+        ]
+      }
+    }
+  },
+  "NAF NAF": {
+    "name": "NAF NAF",
+    "total": 7,
+    "with_restriction": 0,
+    "without_restriction": 7,
+    "projects": {
+      "LABORATORIO": {
+        "name": "LABORATORIO",
+        "total": 5,
+        "restricted": 0,
+        "stage": "LAB",
+        "items": [
+          {
+            "item_matt": "96482",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Strike Off",
+            "oc": "—",
+            "observacion": "Repetición fit sample",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "1026",
+            "cliente": "NAF NAF",
+            "proyecto": "LABORATORIO"
+          },
+          {
+            "item_matt": "97056",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Cancelado",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "NAF NAF",
+            "proyecto": "LABORATORIO"
+          },
+          {
+            "item_matt": "97057",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Cancelado",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "NAF NAF",
+            "proyecto": "LABORATORIO"
+          },
+          {
+            "item_matt": "97058",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Cancelado",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "NAF NAF",
+            "proyecto": "LABORATORIO"
+          },
+          {
+            "item_matt": "97059",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Cancelado",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "NAF NAF",
+            "proyecto": "LABORATORIO"
+          }
+        ]
+      },
+      "RAW CITY": {
+        "name": "RAW CITY",
+        "total": 1,
+        "restricted": 0,
+        "stage": "LAB",
+        "items": [
+          {
+            "item_matt": "97060",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Strike Off",
+            "oc": "—",
+            "observacion": "Repetición Botas",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "NAF NAF",
+            "proyecto": "RAW CITY"
+          }
+        ]
+      },
+      "RIVIERA SOLAR": {
+        "name": "RIVIERA SOLAR",
+        "total": 1,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "—",
+            "item_ura": "4053",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "MUJER",
+            "tejido": "PUNTO",
+            "combo": "SOFT COASTAL",
+            "proceso": "Abast. Desarrollo",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "—",
+            "cliente": "NAF NAF",
+            "proyecto": "RIVIERA SOLAR"
+          }
+        ]
+      }
+    }
+  },
+  "REMANENCE": {
+    "name": "REMANENCE",
+    "total": 5,
+    "with_restriction": 2,
+    "without_restriction": 3,
+    "projects": {
+      "LABORATORIO": {
+        "name": "LABORATORIO",
+        "total": 2,
+        "restricted": 2,
+        "stage": "LAB",
+        "items": [
+          {
+            "item_matt": "96641",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "CHAQUETA",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "HOLMIUM V2",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Pendiente aprobación",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "REMANENCE",
+            "proyecto": "LABORATORIO"
+          },
+          {
+            "item_matt": "96642",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "PANTALÓN",
+            "genero": "HOMBRE",
+            "tejido": "PLANO",
+            "combo": "IRON",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "Pendiente aprobación",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "REMANENCE",
+            "proyecto": "LABORATORIO"
+          }
+        ]
+      },
+      "NIGHT SHIFT": {
+        "name": "NIGHT SHIFT",
+        "total": 1,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "95492",
+            "item_ura": "256",
+            "equipo": "Operaciones",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "HOODIE SHADOW",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "0426",
+            "cliente": "REMANENCE",
+            "proyecto": "NIGHT SHIFT"
+          }
+        ]
+      },
+      "OFF DUTY": {
+        "name": "OFF DUTY",
+        "total": 2,
+        "restricted": 0,
+        "stage": "DEV",
+        "items": [
+          {
+            "item_matt": "95812",
+            "item_ura": "257",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "UNCODED",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "REMANENCE",
+            "proyecto": "OFF DUTY"
+          },
+          {
+            "item_matt": "95813",
+            "item_ura": "258",
+            "equipo": "Operaciones",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "RAW",
+            "proceso": "Producción",
+            "oc": "OK",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "DEV",
+            "coleccion": "Q2-2026",
+            "cliente": "REMANENCE",
+            "proyecto": "OFF DUTY"
+          }
+        ]
+      }
+    }
+  },
+  "UNDERGOLD": {
+    "name": "UNDERGOLD",
+    "total": 5,
+    "with_restriction": 0,
+    "without_restriction": 5,
+    "projects": {
+      "LABORATORIO": {
+        "name": "LABORATORIO",
+        "total": 5,
+        "restricted": 0,
+        "stage": "LAB",
+        "items": [
+          {
+            "item_matt": "97052",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Proto Lab",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "UNDERGOLD",
+            "proyecto": "LABORATORIO"
+          },
+          {
+            "item_matt": "97053",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Fit Sample",
+            "oc": "—",
+            "observacion": "Estamos repitiendo fit sample",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "UNDERGOLD",
+            "proyecto": "LABORATORIO"
+          },
+          {
+            "item_matt": "97054",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "—",
+            "proceso": "Proto Lab",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "UNDERGOLD",
+            "proyecto": "LABORATORIO"
+          },
+          {
+            "item_matt": "97055",
+            "item_ura": "—",
+            "equipo": "Diseño",
+            "categoria": "BUZO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO PESADO",
+            "combo": "—",
+            "proceso": "Proto Lab",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "UNDERGOLD",
+            "proyecto": "LABORATORIO"
+          },
+          {
+            "item_matt": "—",
+            "item_ura": "4120",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "—",
+            "proceso": "Sin definir",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "—",
+            "cliente": "UNDERGOLD",
+            "proyecto": "LABORATORIO"
+          }
+        ]
+      }
+    }
+  },
+  "VÉLEZ": {
+    "name": "VÉLEZ",
+    "total": 2,
+    "with_restriction": 1,
+    "without_restriction": 1,
+    "projects": {
+      "LABORATORIO": {
+        "name": "LABORATORIO",
+        "total": 2,
+        "restricted": 1,
+        "stage": "LAB",
+        "items": [
+          {
+            "item_matt": "96691",
+            "item_ura": "4122",
+            "equipo": "Diseño",
+            "categoria": "CAMISETA",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "AMAU",
+            "proceso": "Muestras Vendedor y Ura",
+            "oc": "—",
+            "observacion": "Pendiente aprobación proto",
+            "restriccion": "Pendiente aprobación cliente",
+            "restriction_type": "Pendiente aprobación cliente",
+            "has_restriction": true,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "VÉLEZ",
+            "proyecto": "LABORATORIO"
+          },
+          {
+            "item_matt": "96690",
+            "item_ura": "4121",
+            "equipo": "Diseño",
+            "categoria": "POLO",
+            "genero": "HOMBRE",
+            "tejido": "PUNTO",
+            "combo": "EIREN",
+            "proceso": "Proto Lab",
+            "oc": "—",
+            "observacion": "",
+            "restriccion": "",
+            "restriction_type": "",
+            "has_restriction": false,
+            "stage": "LAB",
+            "coleccion": "0826",
+            "cliente": "VÉLEZ",
+            "proyecto": "LABORATORIO"
+          }
+        ]
+      }
+    }
+  }
+};
+
+// ══════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════
+const PROC_ORDER = [
+  'Producción','Liberación a Corte','Abast. Producción',
+  'Muestras Vendedor y Ura','Aprobación Fit & Strike',
+  'Strike Off','Fit Sample','Proto Lab',
+  'Abast. Desarrollo','Paso Paquete Diseño','Sin definir'
+];
+
+const RESTR_COLORS = {
+  'Pendiente abastecimiento desarrollo': 'rgba(217,48,37,0.75)',
+  'Pendiente aprobación cliente':        'rgba(201,138,46,0.80)',
+  'Pendiente OC':                        'rgba(74,127,168,0.80)',
+  'Pendiente cambios de ficha cliente':  'rgba(160,100,180,0.80)',
+};
+
+const TEAM_COLORS = {
+  'Diseño':                 'rgba(122,148,120,0.75)',
+  'Desarrollo':             'rgba(74,127,168,0.75)',
+  'Operaciones':            'rgba(201,138,46,0.75)',
+  'Operaciones/Desarrollo': 'rgba(201,138,46,0.55)',
+  'Planeación':             'rgba(90,87,84,0.65)',
+};
+
+const PROC_COLORS = {
+  'Producción':               'rgba(122,148,120,0.75)',
+  'Liberación a Corte':       'rgba(122,148,120,0.55)',
+  'Abast. Producción':        'rgba(74,127,168,0.65)',
+  'Muestras Vendedor y Ura':  'rgba(74,127,168,0.50)',
+  'Aprobación Fit & Strike':  'rgba(201,138,46,0.65)',
+  'Strike Off':               'rgba(201,138,46,0.50)',
+  'Fit Sample':               'rgba(201,138,46,0.40)',
+  'Proto Lab':                'rgba(160,100,180,0.65)',
+  'Abast. Desarrollo':        'rgba(160,100,180,0.50)',
+  'Paso Paquete Diseño':      'rgba(90,87,84,0.65)',
+  'Sin definir':              'rgba(90,87,84,0.40)',
+};
+
+// ══════════════════════════════════════════
+//  CHART MANAGER
+// ══════════════════════════════════════════
+const _charts = {};
+function killChart(id){ if(_charts[id]){ _charts[id].destroy(); delete _charts[id]; } }
+
+function mkBar(id, labels, datasets, opts={}){
+  killChart(id);
+  const ctx = document.getElementById(id); if(!ctx) return;
+  _charts[id] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      indexAxis: opts.horiz ? 'y' : 'x',
+      responsive: true, maintainAspectRatio: false, animation: false,
+      scales: {
+        x: { stacked: opts.stacked||false, grid:{color:'#282828'}, ticks:{color:'#7A7773',font:{size:10,family:'Barlow'}} },
+        y: { stacked: opts.stacked||false, grid:{display:false},   ticks:{color:'#B8B4AE',font:{size:10,family:'Barlow Condensed'}} }
+      },
+      plugins: {
+        legend: { display: opts.legend||false, position:'top', labels:{color:'#B8B4AE',font:{size:10},padding:8,boxWidth:10} },
+        tooltip: {}
+      }
+    }
+  });
+}
+
+function mkDonut(id, labels, data, colors){
+  killChart(id);
+  const ctx = document.getElementById(id); if(!ctx) return;
+  _charts[id] = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets:[{data, backgroundColor:colors, borderWidth:0, hoverOffset:4}] },
+    options: {
+      cutout:'65%', responsive:true, maintainAspectRatio:false, animation:false,
+      plugins: {
+        legend: { display:true, position:'right', labels:{color:'#B8B4AE',font:{size:10,family:'Barlow'},padding:8,boxWidth:10} },
+        tooltip: {}
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+//  DATA HELPERS
+// ══════════════════════════════════════════
+function allItems(clientKey, stageFilter='ALL'){
+  let items = [];
+  if(!clientKey || clientKey==='ALL'){
+    Object.values(DATA).forEach(c =>
+      Object.values(c.projects).forEach(p =>
+        items.push(...p.items.map(i=>({...i, cliente:c.name})))
+      )
+    );
+  } else {
+    const c = DATA[clientKey]; if(!c) return [];
+    Object.values(c.projects).forEach(p =>
+      items.push(...p.items.map(i=>({...i, cliente:c.name})))
+    );
+  }
+  if(stageFilter !== 'ALL') items = items.filter(i=>i.stage===stageFilter);
+  return items;
+}
+
+function procDist(items){
+  const d={};
+  items.forEach(i=>{ const p=i.proceso; if(!d[p]) d[p]={total:0,restr:0}; d[p].total++; if(i.has_restriction)d[p].restr++; });
+  return d;
+}
+
+function restrTypes(items){
+  const d={};
+  items.filter(i=>i.has_restriction).forEach(i=>{
+    const t=i.restriction_type||'Otro'; if(!d[t]) d[t]=0; d[t]++;
+  });
+  return d;
+}
+
+function blockedByProc(items){
+  const d={};
+  items.filter(i=>i.has_restriction).forEach(i=>{
+    const p=i.proceso||'Sin definir'; if(!d[p]) d[p]=0; d[p]++;
+  });
+  return d;
+}
+
+function teamDist(items){
+  const d={};
+  items.forEach(i=>{ const t=i.equipo||'—'; if(!d[t]) d[t]=0; d[t]++; });
+  return d;
+}
+
+function teamTag(t){
+  const cls={
+    'Diseño':'tDis','DIseño':'tDis',
+    'Desarrollo':'tDes','Operaciones':'tOpe',
+    'Operaciones/Desarrollo':'tOD','Planeación':'tPla'
+  }[t]||'tPla';
+  return `<span class="ttag ${cls}">${t||'—'}</span>`;
+}
+
+function pTag(p, isRestr){
+  const cls = isRestr ? 'red' : (p==='Producción'?'sage':'');
+  return `<span class="ptag ${cls}">${p}</span>`;
+}
+
+// ══════════════════════════════════════════
+//  BUILD PILLS
+// ══════════════════════════════════════════
+function buildPills(active){
+  const tot = allItems('ALL').length;
+  let h = `<button class="pill all ${active==='ALL'?'active':''}" onclick="go('ALL')">Todos (${tot})</button>`;
+  Object.values(DATA).sort((a,b)=>b.with_restriction-a.with_restriction).forEach(c=>{
+    const al = c.with_restriction>0 ? 'alert-pill' : '';
+    const ac = active===c.name ? 'active' : '';
+    h += `<button class="pill ${al} ${ac}" onclick="go('${c.name}')">${c.name} <small style="opacity:.55">${c.total}</small></button>`;
+  });
+  document.getElementById('pills').innerHTML = h;
+}
+
+// ══════════════════════════════════════════
+//  GLOBAL SECTION
+// ══════════════════════════════════════════
+function renderGlobal(){
+  document.getElementById('gSec').style.display='';
+  document.getElementById('cSec').style.display='none';
+  const items = allItems('ALL');
+  const restr = items.filter(i=>i.has_restriction);
+
+  // KPIs
+  document.getElementById('gKpis').innerHTML = `
+    <div class="kpi"><div class="kl">Ítems activos totales</div><div class="kv">${items.length}</div><div class="ks">${Object.keys(DATA).length} clientes activos</div></div>
+    <div class="kpi"><div class="kl">Con restricción</div><div class="kv red">${restr.length}</div><div class="ks">${Math.round(restr.length/items.length*100)}% del pipeline bloqueado</div></div>
+    <div class="kpi"><div class="kl">Sin restricción</div><div class="kv sage">${items.length-restr.length}</div><div class="ks">${Math.round((items.length-restr.length)/items.length*100)}% avanzando sin frenos</div></div>
+  `;
+
+  // Charts
+  document.getElementById('gCharts').innerHTML = `
+    <div class="cbox"><div class="ctitle">Ítems bloqueados por proceso</div><div class="ccanvas"><canvas id="gBlockedChart"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Ítems por tipo de restricción</div><div class="ccanvas"><canvas id="gRestrTypeChart"></canvas></div></div>
+  `;
+  setTimeout(()=>{
+    renderBlockedByProcChart('gBlockedChart', items);
+    renderRestrTypeChart('gRestrTypeChart', items);
+  },30);
+
+  // Restriction table grouped by type
+  renderRestrTable('gRestrBody', items, false);
+
+  // Process dist table
+  renderProcTable('gProcBody', items);
+}
+
+// ══════════════════════════════════════════
+//  CHART RENDERERS
+// ══════════════════════════════════════════
+function renderBlockedByProcChart(id, items){
+  const bd = blockedByProc(items);
+  const labels = PROC_ORDER.filter(p=>bd[p]>0);
+  const vals   = labels.map(p=>bd[p]);
+  const colors = labels.map(p=>PROC_COLORS[p]||'rgba(120,120,120,0.6)');
+  mkBar(id, labels, [{label:'Bloqueados', data:vals, backgroundColor:colors, borderWidth:0}], {horiz:true});
+}
+
+function renderRestrTypeChart(id, items){
+  const rd = restrTypes(items);
+  const labels = Object.keys(rd);
+  const vals   = labels.map(l=>rd[l]);
+  const colors = labels.map(l=>RESTR_COLORS[l]||'rgba(120,120,120,0.6)');
+  if(labels.length===0){ killChart(id); return; }
+  mkDonut(id, labels, vals, colors);
+}
+
+function renderTeamChart(id, items){
+  const td = teamDist(items);
+  const labels = Object.keys(td).filter(t=>t!=='—').sort((a,b)=>td[b]-td[a]);
+  const vals   = labels.map(l=>td[l]);
+  const colors = labels.map(l=>TEAM_COLORS[l]||'rgba(120,120,120,0.6)');
+  mkBar(id, labels,
+    [{label:'Ítems', data:vals, backgroundColor:colors, borderWidth:0}],
+    {horiz:true}
+  );
+}
+
+// ══════════════════════════════════════════
+//  RESTRICTION TABLE (grouped by type)
+// ══════════════════════════════════════════
+function renderRestrTable(tbodyId, items, isClient){
+  const restrItems = items.filter(i=>i.has_restriction);
+  if(restrItems.length===0){
+    document.getElementById(tbodyId).innerHTML =
+      `<tr><td colspan="${isClient?9:9}" class="empty">✓ Sin restricciones activas para esta selección.</td></tr>`;
+    return;
+  }
+
+  // Group by restriction type
+  const groups = {};
+  restrItems.forEach(i=>{
+    const t=i.restriction_type||'Otro';
+    if(!groups[t]) groups[t]=[];
+    groups[t].push(i);
+  });
+
+  let html='';
+  // Sort groups by count desc
+  Object.entries(groups).sort((a,b)=>b[1].length-a[1].length).forEach(([type, grpItems])=>{
+    // Type header row
+    const colSpan = isClient ? 9 : 9;
+    html += `<tr class="type-hdr-row"><td colspan="${colSpan}">
+      <span class="type-hdr-lbl">${type}</span>
+      <span class="type-hdr-cnt">${grpItems.length} ítem${grpItems.length!==1?'s':''}</span>
+    </td></tr>`;
+    // Items
+    grpItems.forEach(i=>{
+      const cols = isClient
+        ? `<td class="idc">${i.item_matt}</td><td class="idc">${i.item_ura}</td><td>${teamTag(i.equipo)}</td><td>${i.proyecto}</td><td>${i.combo!=='—'?i.combo:'—'}</td><td>${pTag(i.proceso,true)}</td><td class="restr-cell">${i.restriccion}</td><td class="obs-cell">${i.observacion||'—'}</td><td>${i.oc==='OK'?'<span class="ok">OK</span>':'<span class="no">—</span>'}</td>`
+        : `<td class="idc">${i.item_matt}</td><td class="idc">${i.item_ura}</td><td>${teamTag(i.equipo)}</td><td>${i.cliente||'—'}</td><td>${i.proyecto}</td><td>${i.combo!=='—'?i.combo:'—'}</td><td>${pTag(i.proceso,true)}</td><td class="restr-cell">${i.restriccion}</td><td>${i.oc==='OK'?'<span class="ok">OK</span>':'<span class="no">—</span>'}</td>`;
+      html += `<tr class="rr">${cols}</tr>`;
+    });
+  });
+  document.getElementById(tbodyId).innerHTML = html;
+}
+
+// ══════════════════════════════════════════
+//  PROCESS DIST TABLE
+// ══════════════════════════════════════════
+function renderProcTable(tbodyId, items){
+  const d = procDist(items);
+  const total = items.length;
+  let html='';
+  PROC_ORDER.filter(p=>d[p]).forEach(p=>{
+    const {total:t,restr:r}=d[p];
+    const pct=Math.round(r/t*100);
+    const al=pct>50;
+    html+=`<tr>
+      <td><span class="ptag">${p}</span></td>
+      <td><span class="bignum">${t}</span></td>
+      <td><span class="bignum ${r>0?'r':''}">${r}</span></td>
+      <td><span class="bignum s">${t-r}</span></td>
+      <td><div style="font-size:11px;color:${al?'var(--red)':'var(--t3)'};">${pct}%</div>
+          <div class="bbar"><div class="bfill ${al?'al':''}" style="width:${pct}%"></div></div></td>
+    </tr>`;
+  });
+  const restrTotal = items.filter(i=>i.has_restriction).length;
+  const pct = Math.round(restrTotal/total*100);
+  html+=`<tr style="background:var(--card);border-top:1px solid var(--brdl);">
+    <td style="font-weight:600;color:var(--t1);">TOTAL</td>
+    <td><span class="bignum">${total}</span></td>
+    <td><span class="bignum r">${restrTotal}</span></td>
+    <td><span class="bignum s">${total-restrTotal}</span></td>
+    <td><div style="font-size:11px;color:var(--amb);">${pct}%</div>
+        <div class="bbar"><div class="bfill al" style="width:${pct}%"></div></div></td>
+  </tr>`;
+  document.getElementById(tbodyId).innerHTML = html;
+}
+
+// ══════════════════════════════════════════
+//  CLIENT SECTION
+// ══════════════════════════════════════════
+let curClient = 'ALL';
+let curStage  = 'ALL';
+
+function renderClient(clientKey){
+  document.getElementById('gSec').style.display='none';
+  document.getElementById('cSec').style.display='';
+  document.getElementById('cTitle').textContent = clientKey;
+  curStage = 'ALL';
+  updateStageButtons();
+
+  const items = allItems(clientKey);
+  const restr = items.filter(i=>i.has_restriction);
+
+  // KPIs
+  document.getElementById('cKpis').innerHTML = `
+    <div class="kpi"><div class="kl">Ítems activos</div><div class="kv">${items.length}</div><div class="ks">&nbsp;</div></div>
+    <div class="kpi"><div class="kl">Con restricción</div><div class="kv red">${restr.length}</div><div class="ks">${Math.round(restr.length/items.length*100)}% bloqueado</div></div>
+    <div class="kpi"><div class="kl">Sin restricción</div><div class="kv sage">${items.length-restr.length}</div><div class="ks">&nbsp;</div></div>
+  `;
+
+  // Team chart
+  setTimeout(()=>{ renderTeamChart('cTeamChart', items); }, 30);
+
+  // Render stage-filtered content
+  renderClientFiltered(clientKey, 'ALL');
+}
+
+function renderClientFiltered(clientKey, stageFilter){
+  const items = allItems(clientKey, stageFilter);
+  const restr = items.filter(i=>i.has_restriction);
+
+  // Process charts
+  document.getElementById('cCharts').innerHTML = `
+    <div class="cbox"><div class="ctitle">Ítems bloqueados por proceso${stageFilter!=='ALL'?' — '+stageFilter:''}</div><div class="ccanvas"><canvas id="cBlockedChart"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Ítems por tipo de restricción${stageFilter!=='ALL'?' — '+stageFilter:''}</div><div class="ccanvas"><canvas id="cRestrTypeChart"></canvas></div></div>
+  `;
+  setTimeout(()=>{
+    renderBlockedByProcChart('cBlockedChart', items);
+    renderRestrTypeChart('cRestrTypeChart', items);
+  },30);
+
+  // Restriction title & table
+  const stageLabel = stageFilter==='ALL' ? '' : ` (${stageFilter==='LAB'?'Laboratorio':'Desarrollo'})`;
+  document.getElementById('cRestrTitle').textContent = `Ítems con Restricción${stageLabel}`;
+  renderRestrTable('cRestrBody', items, true);
+
+  // Projects
+  renderProjects(clientKey, stageFilter);
+
+  // Free items chart (non-blocked)
+  const freeItems = items.filter(i=>!i.has_restriction);
+  document.getElementById('cFreeCharts').innerHTML = `
+    <div class="cbox"><div class="ctitle">Proceso — ítems sin restricción (${freeItems.length} ítems)</div><div class="ccanvas"><canvas id="cFreeProc"></canvas></div></div>
+    <div class="cbox"><div class="ctitle">Distribución por equipo — ítems sin restricción</div><div class="ccanvas"><canvas id="cFreeTeam"></canvas></div></div>
+  `;
+  setTimeout(()=>{
+    // Free by process
+    const fpd = procDist(freeItems);
+    const pLabels = PROC_ORDER.filter(p=>fpd[p] && fpd[p].total>0);
+    const pVals   = pLabels.map(p=>fpd[p].total);
+    const pColors = pLabels.map(p=>PROC_COLORS[p]||'rgba(120,120,120,0.5)');
+    mkDonut('cFreeProc', pLabels, pVals, pColors);
+    // Free by team
+    renderTeamChart('cFreeTeam', freeItems);
+  },30);
+}
+
+// ══════════════════════════════════════════
+//  STAGE FILTER
+// ══════════════════════════════════════════
+function setStageFilter(sf){
+  curStage = sf;
+  updateStageButtons();
+  renderClientFiltered(curClient, sf);
+}
+
+function updateStageButtons(){
+  document.getElementById('sfAll').className = 'sf-btn' + (curStage==='ALL'?' active-all':'');
+  document.getElementById('sfLab').className = 'sf-btn' + (curStage==='LAB'?' active-lab':'');
+  document.getElementById('sfDev').className = 'sf-btn' + (curStage==='DEV'?' active-dev':'');
+}
+
+// ══════════════════════════════════════════
+//  PROJECT BLOCKS
+// ══════════════════════════════════════════
+let pcIdx = 0;
+
+function renderProjects(clientKey, stageFilter){
+  const c = DATA[clientKey]; if(!c) return;
+  let projs = Object.values(c.projects);
+  if(stageFilter==='LAB') projs = projs.filter(p=>p.stage==='LAB');
+  if(stageFilter==='DEV') projs = projs.filter(p=>p.stage==='DEV');
+
+  const labProjs = projs.filter(p=>p.stage==='LAB').sort((a,b)=>b.restricted-a.restricted);
+  const devProjs = projs.filter(p=>p.stage==='DEV').sort((a,b)=>b.restricted-a.restricted);
+
+  const labItems = labProjs.reduce((s,p)=>s+p.total,0);
+  const devItems = devProjs.reduce((s,p)=>s+p.total,0);
+
+  document.getElementById('cLabCnt').textContent = `${labProjs.length} proyecto${labProjs.length!==1?'s':''} · ${labItems} ítems`;
+  document.getElementById('cDevCnt').textContent = `${devProjs.length} proyecto${devProjs.length!==1?'s':''} · ${devItems} ítems`;
+
+  document.getElementById('cLabBlock').style.display = (stageFilter==='DEV'||labProjs.length===0) ? 'none' : '';
+  document.getElementById('cDevBlock').style.display = (stageFilter==='LAB'||devProjs.length===0) ? 'none' : '';
+
+  document.getElementById('cLabProj').innerHTML = labProjs.map(p=>buildProjBlock(p)).join('') || '<div class="empty">Sin proyectos de laboratorio.</div>';
+  document.getElementById('cDevProj').innerHTML = devProjs.map(p=>buildProjBlock(p)).join('') || '<div class="empty">Sin proyectos de desarrollo.</div>';
+
+  document.querySelectorAll('.ph').forEach(h=>{
+    h.addEventListener('click',()=>{
+      const body = h.nextElementSibling;
+      const tog  = h.querySelector('.ptog');
+      const open = body.classList.toggle('open');
+      tog.classList.toggle('open', open);
+      if(open) renderProjCharts(h.dataset.id, h.dataset.enc);
+    });
+  });
+}
+
+function buildProjBlock(proj){
+  const id = 'p'+(pcIdx++);
+  const pr = proj.restricted>0;
+  const enc = encodeURIComponent(JSON.stringify(proj.items));
+  const coleccion = proj.items[0]?.coleccion||'';
+
+  let rows='';
+  proj.items.forEach(i=>{
+    const rr=i.has_restriction;
+    rows+=`<tr class="${rr?'rr':''}">
+      <td class="idc">${i.item_matt}</td><td class="idc">${i.item_ura}</td>
+      <td>${teamTag(i.equipo)}</td>
+      <td>${i.categoria} / ${i.genero}</td>
+      <td>${i.tejido}</td>
+      <td>${i.combo!=='—'?i.combo:'—'}</td>
+      <td>${pTag(i.proceso,rr)}</td>
+      <td>${i.oc==='OK'?'<span class="ok">OK</span>':'<span class="no">—</span>'}</td>
+      <td class="${rr?'restr-cell':'obs-cell'}">${rr ? i.restriccion : (i.observacion||'—')}</td>
+    </tr>`;
+  });
+
+  return `<div class="pb ${pr?'pr':''}">
+    <div class="ph" data-id="${id}" data-enc="${enc}">
+      <span class="pn">${proj.name}</span>
+      <span class="pc">${coleccion}</span>
+      <div class="pbdg">
+        <span class="bdg n">${proj.total} ítems</span>
+        ${pr ? `<span class="bdg al">⚠ ${proj.restricted} restricc.</span>` : `<span class="bdg ok">✓ Sin restricciones</span>`}
+      </div>
+      <span class="ptog">▶</span>
+    </div>
+    <div class="pbody" id="body_${id}">
+      <div class="pcharts">
+        <div class="pcb"><div class="pct">Por proceso</div><div class="pccanvas"><canvas id="pc1_${id}"></canvas></div></div>
+        <div class="pcb"><div class="pct">Estado restricción</div><div class="pccanvas"><canvas id="pc2_${id}"></canvas></div></div>
+        <div class="pcb"><div class="pct">Por equipo</div><div class="pccanvas"><canvas id="pc3_${id}"></canvas></div></div>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Matt</th><th>Ura</th><th>Equipo</th><th>Categ/Gén</th><th>Tejido</th><th>Combo</th><th>Proceso</th><th>OC</th><th>Restricción / Nota</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderProjCharts(id, enc){
+  const items = JSON.parse(decodeURIComponent(enc));
+
+  // Chart 1: blocked by process
+  const bd = {}; items.filter(i=>i.has_restriction).forEach(i=>{ const p=i.proceso; if(!bd[p])bd[p]=0;bd[p]++; });
+  const pL=Object.keys(bd), pV=pL.map(p=>bd[p]), pC=pL.map(p=>PROC_COLORS[p]||'rgba(120,120,120,0.6)');
+  if(pL.length){
+    mkBar(`pc1_${id}`,pL,[{label:'Bloqueados',data:pV,backgroundColor:pC,borderWidth:0}],{horiz:true});
+  } else {
+    killChart(`pc1_${id}`);
+    const cv=document.getElementById(`pc1_${id}`); if(cv){const ct=cv.getContext('2d'); ct.clearRect(0,0,cv.width,cv.height); ct.fillStyle='#5A5754'; ct.font='11px Barlow'; ct.fillText('Sin ítems bloqueados',10,30);}
+  }
+
+  // Chart 2: restriction type donut
+  renderRestrTypeChart(`pc2_${id}`, items);
+
+  // Chart 3: team donut
+  const td={}; items.forEach(i=>{const t=i.equipo||'—';if(!td[t])td[t]=0;td[t]++;});
+  const tL=Object.keys(td).filter(t=>t!=='—'), tV=tL.map(t=>td[t]), tC=tL.map(t=>TEAM_COLORS[t]||'rgba(120,120,120,0.5)');
+  mkDonut(`pc3_${id}`, tL, tV, tC);
+}
+
+// ══════════════════════════════════════════
+//  MAIN ENTRY
+// ══════════════════════════════════════════
+function go(clientKey){
+  curClient = clientKey;
+  buildPills(clientKey);
+  if(clientKey==='ALL') renderGlobal();
+  else renderClient(clientKey);
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{ go('ALL'); });
+</script>
+</body>
+</html>
