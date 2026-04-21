@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Informe de Estado Proyectos Clientes — URA Industries</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&family=Barlow+Semi+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -186,6 +187,24 @@ body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-weight:300;
 .fbn{font-family:var(--fd);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t2);}
 
 .empty{padding:32px;text-align:center;color:var(--t4);font-size:13px;}
+/* ─── UPLOAD BUTTON ──────────────────────────── */
+.upload-bar{background:var(--hdr-bg);padding:0 0 32px;}
+.upload-inner{max-width:1340px;margin:0 auto;padding:0 56px;}
+.upload-zone{display:flex;align-items:center;gap:14px;padding:14px 20px;background:rgba(255,255,255,0.06);border:1.5px dashed rgba(255,255,255,0.18);border-radius:var(--r);cursor:pointer;transition:all .2s;width:fit-content;}
+.upload-zone:hover{background:rgba(255,255,255,0.10);border-color:rgba(255,255,255,0.35);}
+.upload-zone.dragging{background:rgba(200,38,28,0.15);border-color:rgba(200,38,28,0.5);}
+.upload-icon{font-size:18px;line-height:1;}
+.upload-text{font-family:var(--fd);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);}
+.upload-sub{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;}
+.upload-filename{font-size:11px;color:rgba(200,38,28,0.8);font-weight:500;margin-top:2px;display:none;}
+.upload-filename.show{display:block;}
+.upload-btn{padding:8px 20px;font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.22);color:rgba(255,255,255,0.80);cursor:pointer;border-radius:var(--rpill);transition:all .15s;white-space:nowrap;}
+.upload-btn:hover{background:rgba(255,255,255,0.18);color:#fff;}
+.upload-status{display:flex;align-items:center;gap:8px;font-size:11px;color:rgba(255,255,255,0.50);}
+.upload-status.ok{color:rgba(122,200,130,0.85);}
+.upload-status.err{color:rgba(200,80,70,0.85);}
+.upload-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
 </style>
 </head>
 <body>
@@ -196,6 +215,29 @@ body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-weight:300;
   <div class="brow"><div class="bdot"></div><div class="bname">URA <span>Industries</span></div></div>
   <div class="rtitle">Informe de Estado<br>Proyectos Clientes</div>
   <div class="rmeta">Dirigido a: <strong>Equipo Comercial</strong> &nbsp;·&nbsp; Generado: <strong>16 de abril de 2026</strong> &nbsp;·&nbsp; Fuente: Cronograma Detallado</div>
+  </div>
+</div>
+
+
+<!-- UPLOAD BAR -->
+<div class="upload-bar">
+  <div class="upload-inner">
+    <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+      <label class="upload-zone" id="uploadZone" for="fileInput">
+        <span class="upload-icon">📂</span>
+        <div>
+          <div class="upload-text">Cargar cronograma</div>
+          <div class="upload-sub">Cronograma_detallado.xlsx</div>
+          <div class="upload-filename" id="uploadFilename"></div>
+        </div>
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click();event.preventDefault();">Seleccionar archivo</button>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;" onchange="handleFile(this.files[0])">
+      </label>
+      <div class="upload-status" id="uploadStatus">
+        <span class="upload-dot"></span>
+        <span id="uploadStatusText">Usando datos precargados</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3551,6 +3593,161 @@ function go(clientKey){
   buildPills(clientKey);
   if(clientKey==='ALL') renderGlobal();
   else renderClient(clientKey);
+}
+
+
+// ══════════════════════════════════════════
+//  EXCEL UPLOAD & PARSE
+// ══════════════════════════════════════════
+
+// Drag-and-drop support
+document.addEventListener('DOMContentLoaded', () => {
+  const zone = document.getElementById('uploadZone');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragging'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragging');
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+});
+
+function setStatus(msg, type='') {
+  const el = document.getElementById('uploadStatus');
+  const txt = document.getElementById('uploadStatusText');
+  el.className = 'upload-status' + (type ? ' '+type : '');
+  txt.textContent = msg;
+}
+
+function handleFile(file) {
+  if (!file) return;
+  setStatus('Procesando…');
+  document.getElementById('uploadFilename').textContent = file.name;
+  document.getElementById('uploadFilename').classList.add('show');
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+      // Find "Cronograma" sheet
+      const sheetName = wb.SheetNames.find(n => n.toLowerCase().includes('cronograma'));
+      if (!sheetName) throw new Error('No se encontró la hoja "Cronograma"');
+      const ws = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: null, raw: false });
+      const newData = buildDataFromRows(rows);
+      if (Object.keys(newData).length === 0) throw new Error('No se encontraron ítems activos');
+      // Patch global DATA
+      Object.keys(DATA).forEach(k => delete DATA[k]);
+      Object.assign(DATA, newData);
+      setStatus(`✓ ${file.name} — ${Object.values(newData).reduce((s,c)=>s+c.total,0)} ítems cargados`, 'ok');
+      go('ALL');
+    } catch(err) {
+      setStatus('Error: ' + err.message, 'err');
+      console.error(err);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function buildDataFromRows(rows) {
+  const PROD_STATES = new Set(['ENTREGA PT','ENTREGA CLIENTE','PROGRAMACIÓN A CORTE']);
+  const PROCESS_MAP = {
+    'PROTO LAB': 'Proto Lab', 'FIT SAMPLE': 'Fit Sample',
+    'STRIKE OFF': 'Strike Off', 'APROBACIÓN FIT Y STRIKE': 'Aprobación Fit & Strike',
+    'MUESTRAS VENDEDOR Y URA': 'Muestras Vendedor y Ura',
+    'ABASTECIMIENTO DESARROLLO': 'Abast. Desarrollo',
+    'ABASTECIMIENTO PRODUCCIÓN': 'Abast. Producción',
+    'LIBERACIÓN A CORTE': 'Liberación a Corte',
+    'PASO DE PAQUETE DISEÑO': 'Paso Paquete Diseño',
+  };
+  const LAB_PROCS = new Set(['Proto Lab','Fit Sample','Strike Off','Aprobación Fit & Strike','Paso Paquete Diseño']);
+
+  function mapProceso(p) {
+    if (!p || String(p).trim() === '') return 'Sin definir';
+    const s = String(p).trim().toUpperCase();
+    if (PROD_STATES.has(s)) return 'Producción';
+    return PROCESS_MAP[s] || String(p).trim();
+  }
+
+  function normTeam(t) {
+    if (!t) return '—';
+    const s = String(t).trim();
+    if (s.includes('Diseño') || s.includes('DIseño')) return 'Diseño';
+    if (s.includes('Operaciones/Desarrollo')) return 'Operaciones/Desarrollo';
+    if (s.includes('Operaciones')) return 'Operaciones';
+    if (s.includes('Desarrollo')) return 'Desarrollo';
+    if (s.includes('Planeación')) return 'Planeación';
+    return s;
+  }
+
+  function classifyStage(proceso, proyecto) {
+    const proc = String(proceso || '').trim();
+    const proj = String(proyecto || '').trim().toUpperCase();
+    if (LAB_PROCS.has(proc) || proj.includes('LABORATORIO')) return 'LAB';
+    return 'DEV';
+  }
+
+  function safeInt(v) {
+    if (v === null || v === undefined || String(v).trim() === '') return '—';
+    const n = parseInt(String(v).replace(/[^0-9]/g,''));
+    return isNaN(n) ? '—' : String(n);
+  }
+
+  // Filter active rows
+  const active = rows.filter(r => {
+    const canc = String(r['CANCELADO'] || '').trim().toUpperCase();
+    return canc === '' || canc === 'NULL' || canc === 'UNDEFINED';
+  });
+
+  const clients = {};
+  active.forEach(r => {
+    const cliente = String(r['CLIENTE'] || '').trim();
+    if (!cliente || cliente === 'NULL') return;
+
+    const restriccion = String(r['RESTRICCIÓN'] || r['RESTRICCION'] || '').trim();
+    const hasRestr = restriccion !== '' && restriccion !== 'NULL' && restriccion !== 'undefined';
+    const proceso = mapProceso(r['PROCESO SIGUIENTE']);
+    const proyecto = String(r['PROYECTO'] || '[SIN PROYECTO]').trim();
+    const obs = String(r['OBSERVACIÓN'] || r['OBSERVACION'] || '').trim();
+
+    const item = {
+      item_matt:       safeInt(r['ITEM MATT']),
+      item_ura:        safeInt(r['ITEM URA']),
+      equipo:          normTeam(r['EQUIPO']),
+      categoria:       String(r['CATEGORIA'] || '—').trim(),
+      genero:          String(r['GENERO'] || '—').trim(),
+      tejido:          String(r['TIPO DE TEJIDO'] || '—').trim(),
+      combo:           String(r['COMBO'] || '—').trim() || '—',
+      proceso,
+      oc:              String(r['OC CONFIRMADA'] || '').trim() === 'OK' ? 'OK' : '—',
+      observacion:     obs === 'NULL' ? '' : obs,
+      restriccion:     hasRestr ? restriccion : '',
+      restriction_type: hasRestr ? restriccion : '',
+      has_restriction: hasRestr,
+      stage:           classifyStage(proceso, proyecto),
+      coleccion:       String(r['COLECCIÓN'] || '—').trim(),
+      cliente,
+      proyecto,
+    };
+
+    if (!clients[cliente]) {
+      clients[cliente] = { name: cliente, total: 0, with_restriction: 0, without_restriction: 0, projects: {} };
+    }
+    if (!clients[cliente].projects[proyecto]) {
+      clients[cliente].projects[proyecto] = { name: proyecto, total: 0, restricted: 0, stage: item.stage, items: [] };
+    }
+
+    const c = clients[cliente];
+    const p = c.projects[proyecto];
+    c.total++;
+    p.total++;
+    p.items.push(item);
+    if (hasRestr) { c.with_restriction++; p.restricted++; }
+    else c.without_restriction++;
+  });
+
+  return clients;
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{ go('ALL'); });
